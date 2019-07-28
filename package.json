@@ -1,0 +1,18 @@
+{
+  "name": "expresso",
+  "version": "1.0.0",
+  "description": "expresso aims at helping developer to debug their application",
+  "main": "index.js",
+  "repository": "git@github.com:ekino/expresso.git",
+  "author": "Matthieu Leroy <matthieu.leroy@ekino.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "tslint": "^5.18.0",
+    "typescript": "^3.5.3"
+  },
+  "scripts": {
+    "lint": "tsc --noEmit && tslint \"src/**/*.{js,ts}\" --quiet --fix",
+    "build-ts": "tsc",
+    "build": "npm run build-ts && npm run lint"
+  }
+}
