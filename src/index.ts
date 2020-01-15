@@ -24,10 +24,10 @@ export async function debugLogger(options: Options): Promise<Handler> {
 }
 
 router.get(
-    '/debug/:id',
+    '/debug/:uuid',
     async (req: Request, res: Response): Promise<any> => {
         if (config.env === process.env.NODE_ENV || 'dev' === process.env.NODE_ENV) {
-            const fileName = `${res.locals.uuid}.json`
+            const fileName = `${req.query.uuid}.json`
             const fileContent = await fs.promises.readFile(
                 path.join(config.outputDir || __dirname, fileName)
             )
