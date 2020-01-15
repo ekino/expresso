@@ -1,15 +1,19 @@
-import { Handler, Request, Response } from 'express'
+import { Handler, Request, Response, Router } from 'express'
 import fs from 'fs'
 import path from 'path'
 import uuid from 'uuid'
 import { Options } from './definitions'
 
-export async function debugLogger(config: Options): Promise<Handler> {
-    const dir = path.normalize(config.outputDir || __dirname)
+const router = Router()
+let config: Options
+
+export async function debugLogger(options: Options): Promise<Handler> {
+    config = options
+    const dir = path.normalize(options.outputDir || __dirname)
     await fs.promises.mkdir(dir, { recursive: true })
 
     return async (req: Request, res: Response, next: () => void): Promise<void> => {
-        if (config.env === process.env.NODE_ENV || 'dev' === process.env.NODE_ENV) {
+        if (options.env === process.env.NODE_ENV || 'dev' === process.env.NODE_ENV) {
             const uuidGenerated = uuid()
             res.locals.uuid = uuidGenerated
             const fileName = `${uuidGenerated}.json`
@@ -18,5 +22,17 @@ export async function debugLogger(config: Options): Promise<Handler> {
         next()
     }
 }
+
+router.get(
+    '/debug/:id',
+    async (req: Request, res: Response): Promise<any> => {
+        const fileName = `${res.locals.uuid}.json`
+        const fileContent = await fs.promises.readFile(
+            path.join(config.outputDir || __dirname, fileName)
+        )
+
+        return res.status(200).send(fileContent)
+    }
+)
 
 export * from './definitions'
