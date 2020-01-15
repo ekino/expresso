@@ -26,12 +26,16 @@ export async function debugLogger(options: Options): Promise<Handler> {
 router.get(
     '/debug/:id',
     async (req: Request, res: Response): Promise<any> => {
-        const fileName = `${res.locals.uuid}.json`
-        const fileContent = await fs.promises.readFile(
-            path.join(config.outputDir || __dirname, fileName)
-        )
+        if (config.env === process.env.NODE_ENV || 'dev' === process.env.NODE_ENV) {
+            const fileName = `${res.locals.uuid}.json`
+            const fileContent = await fs.promises.readFile(
+                path.join(config.outputDir || __dirname, fileName)
+            )
 
-        return res.status(200).send(fileContent)
+            return res.status(200).send(fileContent)
+        } else {
+            return res.status(401)
+        }
     }
 )
 
