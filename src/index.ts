@@ -26,10 +26,9 @@ export async function debugLogger(req: Request, res: Response, next: () => void)
         const uuidGenerated = uuid()
         res.locals.uuid = uuidGenerated
         res.append('uuid', uuidGenerated)
-        const fileName = `${uuidGenerated}.json`
-        const pathFile = path.join(config.outputDir, fileName)
+        const filePath = path.join(config.outputDir, `${uuidGenerated}.json`)
         await fs.promises.writeFile(
-            path.join(pathFile),
+            path.join(filePath),
             JSON.stringify({
                 headers: req.headers,
                 method: req.method,
