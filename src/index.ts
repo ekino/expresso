@@ -2,7 +2,7 @@ import { Request, Response, Router } from 'express'
 import fs from 'fs'
 import path from 'path'
 import uuid from 'uuid'
-import { Options, Environment, DefaultPath } from './definitions'
+import { Options, Environment, DefaultPath, RegexDebugRoute } from './definitions'
 
 export const router = Router()
 const outputDir = path.join(__dirname, DefaultPath)
@@ -25,7 +25,7 @@ export function debugLoggerInit(options?: Options): void {
 }
 
 export function debugLogger(req: Request, res: Response, next: () => void): void {
-    if (config.env === process.env.NODE_ENV) {
+    if (config.env === process.env.NODE_ENV && !RegExp(RegexDebugRoute).exec(req.url)) {
         const uuidGenerated = uuid()
         res.locals.uuid = uuidGenerated
         res.append('uuid', uuidGenerated)

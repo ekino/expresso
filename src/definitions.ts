@@ -8,3 +8,4 @@ export enum Environment {
 }
 
 export const DefaultPath = 'tmp'
+export const RegexDebugRoute = '/debug/[A-Za-z0-9_-]+'
