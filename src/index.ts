@@ -2,63 +2,65 @@ import { Request, Response, Router } from 'express'
 import fs from 'fs'
 import path from 'path'
 import uuid from 'uuid'
-import { Options } from './definitions'
+import { Options, Environment, DefaultPath } from './definitions'
 
-const router = Router()
-const outputDir = path.join(__dirname, 'tmp')
+export const router = Router()
+const outputDir = path.join(__dirname, DefaultPath)
 let config: Required<Options> = {
     outputDir,
-    env: 'dev'
+    env: Environment.Dev
 }
 
 export function debugLoggerInit(options?: Options): void {
     config = {
-        outputDir: path.normalize(options?.outputDir ?? config.outputDir),
-        env: options?.env ?? 'dev'
+        outputDir:
+            options && options.outputDir
+                ? path.join(__dirname, options.outputDir)
+                : config.outputDir,
+        env: options && options.env ? options.env : Environment.Dev
     }
     if (config.env === process.env.NODE_ENV) {
         fs.mkdir(config.outputDir, { recursive: true }, () => undefined)
     }
 }
 
-export async function debugLogger(req: Request, res: Response, next: () => void): Promise<void> {
+export function debugLogger(req: Request, res: Response, next: () => void): void {
     if (config.env === process.env.NODE_ENV) {
         const uuidGenerated = uuid()
         res.locals.uuid = uuidGenerated
         res.append('uuid', uuidGenerated)
-        const filePath = path.join(config.outputDir, `${uuidGenerated}.json`)
-        await fs.promises.writeFile(
-            path.join(filePath),
-            JSON.stringify({
-                headers: req.headers,
-                method: req.method,
-                query: req.query,
-                params: req.params
+        fs.promises
+            .writeFile(
+                path.join(config.outputDir, `${uuidGenerated}.json`),
+                JSON.stringify({
+                    headers: req.headers,
+                    method: req.method,
+                    query: req.query,
+                    params: req.params
+                })
+            )
+            .then(() => {
+                next()
             })
-        )
+    } else {
+        next()
     }
-    next()
 }
 
-router.get(
-    '/debug/:uuid',
-    async (req: Request, res: Response): Promise<object> => {
-        if (config.env === process.env.NODE_ENV) {
-            const filePath = path.join(config.outputDir, `${req.params.uuid}.json`)
-
-            try {
-                await fs.promises.access(filePath)
-                const fileContent = await fs.promises.readFile(filePath, {
-                    encoding: 'utf8'
-                })
-                return res.status(200).json(JSON.parse(fileContent))
-            } catch (e) {
-                return res.status(404).send()
-            }
+router.get('/debug/:uuid', async (req: Request, res: Response) => {
+    if (config.env === process.env.NODE_ENV) {
+        const filePath = path.join(config.outputDir, `${req.params.uuid}.json`)
+        try {
+            await fs.promises.access(filePath)
+            const fileContent = await fs.promises.readFile(filePath, {
+                encoding: 'utf8'
+            })
+            return res.status(200).json(JSON.parse(fileContent))
+        } catch (e) {
+            return res.status(404).send()
         }
-        return res.status(401)
     }
-)
+    return res.status(200).send()
+})
 
-export { router }
 export * from './definitions'
