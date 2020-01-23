@@ -1,4 +1,4 @@
-import { Request, Response, Router } from 'express'
+import express, { Request, Response, Router } from 'express'
 import fs from 'fs'
 import path from 'path'
 import uuid from 'uuid'
@@ -9,6 +9,20 @@ const outputDir = path.join(__dirname, DefaultPath)
 let config: Required<Options> = {
     outputDir,
     env: Environment.Dev
+}
+
+function writeRequest(req: Request, path: string): Promise<void> {
+    return fs.promises.writeFile(
+        path,
+        JSON.stringify({
+            request: {
+                headers: req.headers,
+                method: req.method,
+                query: req.query,
+                params: req.params
+            }
+        })
+    )
 }
 
 export function debugLoggerInit(options?: Options): void {
@@ -29,19 +43,25 @@ export function debugLogger(req: Request, res: Response, next: () => void): void
         const uuidGenerated = uuid()
         res.locals.uuid = uuidGenerated
         res.append('uuid', uuidGenerated)
-        fs.promises
-            .writeFile(
-                path.join(config.outputDir, `${uuidGenerated}.json`),
-                JSON.stringify({
-                    headers: req.headers,
-                    method: req.method,
-                    query: req.query,
-                    params: req.params
+        const filePath = path.join(config.outputDir, `${uuidGenerated}.json`)
+
+        res.on('finish', () => {
+            fs.promises
+                .readFile(filePath, { encoding: 'utf8' })
+                .then(content => {
+                    const parsedContent = JSON.parse(content)
+                    parsedContent.response = {
+                        status: res.statusCode
+                    }
+                    return parsedContent
                 })
-            )
-            .then(() => {
-                next()
-            })
+                .then(output => {
+                    fs.promises.writeFile(filePath, JSON.stringify(output))
+                })
+        })
+        writeRequest(req, filePath).then(() => {
+            next()
+        })
     } else {
         next()
     }
