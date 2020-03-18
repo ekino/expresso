@@ -24,7 +24,7 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
-    - run: npm ci
-    - run: npm run lint
-      env:
-        CI: true
+    - name: Install dependencies
+      run: yarn --frozen-lockfile --ignore-optional
+    - name: Lint project
+      run: yarn lint
