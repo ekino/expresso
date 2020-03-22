@@ -1,6 +1,35 @@
 import { NextFunction, Response, Request } from 'express-serve-static-core'
+import { Config, ExpressoApp, ExpressoResponse } from './definitions'
 
-export const expresso = (req: Request, res: Response, next: NextFunction): void => {
+let config: Config = {
+    env: 'development'
+}
+
+export const expressoApp = (app: ExpressoApp, setting: Config = {}): ExpressoApp => {
+    config = { ...config, ...setting }
+
+    if (setting.env !== process.env.NODE_ENV) {
+        return app
+    }
+
+    const oldHandle = app.handle
+
+    app.handle = function(req: Request, res: ExpressoResponse, next: NextFunction): void {
+        res.ctx = {
+            startAt: Date.now()
+        }
+        oldHandle.call(app, req, res, next)
+    }
+
+    app.use(expressoMiddleware)
+
+    return app
+}
+
+const expressoMiddleware = (req: Request, res: Response, next: NextFunction): void => {
+    if (req.get('debugHeader') !== 'true') {
+        return next()
+    }
     const oldSend = res.send
 
     res.send = (obj?: any): Response => {
