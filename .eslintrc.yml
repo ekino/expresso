@@ -23,3 +23,6 @@ rules:
   'prefer-object-spread': 'error'
   'no-unused-vars': ['off']
   '@typescript-eslint/no-unused-vars': ['error', { ignoreRestSiblings: true, args: 'none' }]
+  "@typescript-eslint/ban-ts-ignore": "off"
+  "@typescript-eslint/no-explicit-any": "off"
+  "@typescript-eslint/unbound-method": "off"
