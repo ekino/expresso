@@ -13,4 +13,17 @@ expresso should **NOT** be used in production environments.
 #### Install
 `npm install expresso --save-dev`
 
-### Contribution
+#### How to use it
+Example
+
+```js
+const express = require('express')
+const {expressoApp} = require('expresso')
+
+const app = expressoApp(express(), {})
+
+```
+
+![Example](docs/exemple.png)
+
+### Exemple of output
