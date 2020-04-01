@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <style>
+            html {
+                font-family: sans-serif;
+            }
+
+            table {
+                border-collapse: collapse;
+                border: 2px solid rgb(200, 200, 200);
+                letter-spacing: 1px;
+                font-size: 0.8rem;
+            }
+
+            td,
+            th {
+                border: 1px solid rgb(190, 190, 190);
+                padding: 10px 20px;
+            }
+
+            td {
+                text-align: center;
+            }
+
+            caption {
+                padding: 10px;
+            }
+        </style>
+    </head>
+    <pre></pre>
+    <body>
+        <div>
+            <h2>Request :</h2>
+            <table>
+                <tr>
+                    <td>Verbe</td>
+                    <td>{{body.request.method}}</td>
+                </tr>
+                <tr>
+                    <td>Hostname</td>
+                    <td>{{body.request.host}}</td>
+                </tr>
+                <tr>
+                    <td>Resource</td>
+                    <td>{{body.request.url}}</td>
+                </tr>
+                <tr>
+                    <td>Http Version</td>
+                    <td>{{body.request.httpVersion}}</td>
+                </tr>
+                {{#each body.request.queryParams}}
+                <tr>
+                    <td>{{@key}}</td>
+                    <td>{{this}}</td>
+                </tr>
+                {{/each}}
+            </table>
+
+            <h2>Request headers:</h2>
+            <table>
+                {{#each body.request.headers}}
+                <tr>
+                    <td>{{@key}}</td>
+                    <td>{{this}}</td>
+                </tr>
+                {{/each}}
+            </table>
+
+            <h2>Response</h2>
+            <table>
+                <tr>
+                    <td>Time to response</td>
+                    <td>{{body.response.responseTime}} ms</td>
+                </tr>
+                <tr>
+                    <td>Status Code</td>
+                    <td>{{body.response.statusCode}}</td>
+                </tr>
+            </table>
+
+            <h2>Response headers</h2>
+            <table>
+                {{#each body.response.headers}}
+                <tr>
+                    <td>{{@key}}</td>
+                    <td>{{this}}</td>
+                </tr>
+                {{/each}}
+            </table>
+        </div>
+    </body>
+</html>

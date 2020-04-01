@@ -1,16 +1,8 @@
-const fs = require('fs').promises
+const fs = require('fs')
+const path = require('path')
 const Handlebars = require('handlebars')
-
-let config = {
-    env: 'dev'
-}
+const view = path.join(__dirname, '../views/leroy.html')
 exports.expressoApp = (app, setting = {}) => {
-    config = { ...config, ...setting }
-
-    if (process.env.NODE_ENV !== setting.env) {
-        return app
-    }
-
     const oldHandle = app.handle
 
     app.handle = function(req, res, next) {
@@ -40,18 +32,10 @@ exports.expressoApp = (app, setting = {}) => {
 
 const sendEdit = function(obj) {
     if (typeof obj === 'object') {
-        return fs
-            .readFile('./../views/index.html', 'utf8')
-            .then(htmlContent => {
-                const contentWithJson = htmlContent.replace(
-                    '<pre></pre>',
-                    `<pre>${JSON.stringify(obj)}</pre>`
-                )
-                return this.oldSend(contentWithJson)
-            })
-            .catch(e => {
-                return this.oldSend(obj)
-            })
+        const content = fs.readFileSync(view, 'utf8')
+
+        const contentWithJson = content.replace('<pre></pre>', `<pre>${JSON.stringify(obj)}</pre>`)
+        return this.oldSend(contentWithJson)
     }
     return this.oldSend(obj)
 }
