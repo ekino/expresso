@@ -16,6 +16,9 @@
         "@types/lodash": "^4.14.149",
         "@types/react": "^16.9.34",
         "@types/react-dom": "^16.9.6",
+        "@types/react-redux": "^7.1.7",
+        "@types/redux": "^3.6.0",
+        "@types/redux-devtools-extension": "^2.13.2",
         "@typescript-eslint/parser": "^2.16.0",
         "eslint": "^6.8.0",
         "eslint-config-prettier": "^6.10.0",
@@ -37,6 +40,10 @@
         "lodash": "^4.17.15",
         "react": "^16.13.1",
         "react-dom": "^16.13.1",
+        "react-json-view": "^1.19.1",
+        "react-redux": "^7.2.0",
+        "redux": "^4.0.5",
+        "redux-devtools-extension": "^2.13.8",
         "ts-loader": "^7.0.0"
     },
     "scripts": {

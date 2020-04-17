@@ -2,28 +2,45 @@ import http, { RequestOptions, ClientRequest, IncomingMessage } from 'http'
 import decompressResponse from 'decompress-response'
 import crypto from 'crypto'
 import { URL } from 'url'
+import {
+    ExpressoHttpInterceptorData,
+    ExpressoHttpInterceptorCallback,
+    ExpressoHttpInterceptorResponse,
+    ExpressoHttpInterceptorRequest
+} from './definitions'
 
-type Callback = (res: IncomingMessage) => void
 class ExpressoHttpInterceptor {
-    data: Array<any> = []
+    data: Array<ExpressoHttpInterceptorData> = []
 
     constructor() {
-        const originalHttpRequest = http.request
+        const originalHttpRequestCallback: (
+            url: string | RequestOptions | URL,
+            options: RequestOptions | ExpressoHttpInterceptorCallback | undefined,
+            callback?: ExpressoHttpInterceptorCallback
+        ) => ClientRequest = http.request
         http.request = (
             url: string | RequestOptions | URL,
-            options: RequestOptions | Callback | undefined,
-            callback?: Callback
+            options: RequestOptions | ExpressoHttpInterceptorCallback | undefined,
+            callback?: ExpressoHttpInterceptorCallback
         ): ClientRequest => {
             const startAt = process.hrtime()
 
             if (this.isURL(url)) {
                 const opt = options as RequestOptions
-                const cb = this.overrideCallback(opt, callback as Callback, startAt)
-                return originalHttpRequest(url, opt, cb)
+                const cb = this.overrideCallback(
+                    opt,
+                    callback as ExpressoHttpInterceptorCallback,
+                    startAt
+                )
+                return originalHttpRequestCallback(url, opt, cb)
             } else {
                 const opt = url as RequestOptions
-                const cb = this.overrideCallback(opt, callback as Callback, startAt)
-                return originalHttpRequest(opt, cb)
+                const cb = this.overrideCallback(
+                    opt,
+                    options as ExpressoHttpInterceptorCallback,
+                    startAt
+                )
+                return originalHttpRequestCallback(opt, cb)
             }
         }
     }
@@ -41,17 +58,17 @@ class ExpressoHttpInterceptor {
      */
     overrideCallback(
         options: RequestOptions,
-        originalHttpRequestCallback: Callback,
+        originalHttpRequestCallback: ExpressoHttpInterceptorCallback,
         startAt: [number, number]
-    ): Callback {
+    ): ExpressoHttpInterceptorCallback {
         // Each call is identified by a hash based on request structure to avoid stream from getting lost.
         const hash = crypto
             .createHash('md5')
-            .update(JSON.stringify({ ...options, date: new Date() }))
+            .update(JSON.stringify({ date: new Date() }))
             .digest('hex')
         const buffer: any = {}
         if (!buffer[hash]) buffer[hash] = []
-        return (res: any): any => {
+        return (res: IncomingMessage): any => {
             // In some case depending on http client (axios, got...) we need to decompress response before handle it.
             const response = decompressResponse(res)
 
@@ -65,50 +82,38 @@ class ExpressoHttpInterceptor {
                     const data = Buffer.concat(buffer[hash])
                     const json = JSON.parse(data.toString())
                     // In memory storage.
-                    this.data = [
-                        ...this.data,
-                        {
-                            id: hash,
-                            response: this.formatRes({ time, data: json, ...res }),
-                            request: this.formatReq({ ...options })
-                        }
-                    ]
+                    this.formatData(res, time, options, hash, json)
                 } else {
                     // This is the place where edge cases should be handle (301...).
-                    console.error(`Something wrong with response : ${res.statusCode}`)
+                    const error = new Error(`Something wrong with response : ${res.statusCode}`)
                     // In memory storage.
-                    this.data = [
-                        ...this.data,
-                        {
-                            id: hash,
-                            response: this.formatRes({ time, ...res }),
-                            request: this.formatReq({ ...options, id: hash })
-                        }
-                    ]
+                    this.formatData(res, time, options, hash, null, error)
                 }
             })
             originalHttpRequestCallback(res)
         }
     }
 
-    formatRes = (res: any): any => {
-        // Good place to filter what we need to handle in the view (response).
-        const { headers, statusCode, statusMessage, data, time, responseUrl, error } = res
-        return {
-            headers,
-            statusCode,
-            statusMessage,
-            data,
+    private formatData(
+        res: http.IncomingMessage,
+        time: number,
+        options: http.RequestOptions,
+        hash: string,
+        data?: any,
+        error?: any
+    ): void {
+        const expressoResponse: ExpressoHttpInterceptorResponse = Object.assign(res, {
             time,
-            responseUrl,
-            error
+            data: data || undefined,
+            error: error || undefined
+        })
+        const expressoRequest: ExpressoHttpInterceptorRequest = options
+        const expressoData: ExpressoHttpInterceptorData = {
+            id: hash,
+            response: expressoResponse,
+            request: expressoRequest
         }
-    }
-
-    formatReq = (req: any): any => {
-        // Good place to filter what we need to handle in the view (request).
-        const { headers, protocol, hostname, path, method } = req
-        return { headers, protocol, hostname, path, method }
+        this.data = [...this.data, expressoData]
     }
 }
 
