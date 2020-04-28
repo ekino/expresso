@@ -11,7 +11,6 @@ import {
 
 class ExpressoHttpInterceptor {
     data: Array<ExpressoHttpInterceptorData> = []
-
     constructor() {
         const originalHttpRequestCallback: (
             url: string | RequestOptions | URL,

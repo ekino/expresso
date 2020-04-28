@@ -4,9 +4,7 @@ import path from 'path'
 import { handleRender } from './views/server'
 import ExpressoHttpInterceptor from './interceptors/http'
 import { EXPRESSO_STATIC_PATH, EXPRESSO_PUBLIC_PATH } from './constants'
-
 let interceptor: ExpressoHttpInterceptor
-
 const middleware = (app: any, options: any = defaultOptions): any => {
     handleStatic(app)
     return (req: any, res: any, next: any): any => {
@@ -21,6 +19,7 @@ const middleware = (app: any, options: any = defaultOptions): any => {
             res.set('Content-Type', 'text/html')
             res.status(200)
             send.call(this, handleRender({ ...originalRes, data: body }, interceptor.data))
+            interceptor.data = []
         }
 
         res.json = function(body: any): any {
@@ -28,6 +27,7 @@ const middleware = (app: any, options: any = defaultOptions): any => {
             res.set('Content-Type', 'text/html')
             res.status(200)
             send.call(this, handleRender({ ...originalRes, data: body }, interceptor.data))
+            interceptor.data = []
         }
 
         return next()
