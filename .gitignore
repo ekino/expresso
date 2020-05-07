@@ -4,3 +4,7 @@
 # IDE configurations
 .idea
 .vscode
+package-lock.json
+
+# Remove mac tmp files
+.DS_Store
