@@ -1,15 +1,13 @@
 import React from 'react'
-interface AppProps {
-    data: any
-}
-class App extends React.Component<AppProps> {
-    render(): any {
-        return (
-            <div>
-                <h1>Hello world</h1>
-            </div>
-        )
-    }
-}
+import { AppProps } from './definitions'
+import List from './List'
+import ListItem from './ListItem'
+
+const App = ({ data }: AppProps): JSX.Element => (
+    <React.Fragment>
+        {<ListItem title="Original call" item={data?.originalCall}></ListItem>}
+        {<List title="Underlying calls" items={data?.underlyingCalls}></List>}
+    </React.Fragment>
+)
 
 export default App

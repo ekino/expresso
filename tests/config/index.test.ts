@@ -2,18 +2,20 @@ import { runInValidEnvironment, isEnable } from '../../src/config'
 
 describe('Expresso > config', () => {
     const validRequest = {
-        header: (): boolean => true
+        header: (): boolean => true,
+        path: '/api/v1'
     }
 
     const invalidRequest = {
-        header: (): boolean => false
+        header: (): boolean => false,
+        path: '/expresso'
     }
     describe('isEnable', () => {
-        test('should be enable', () => {
+        test('should be true', () => {
             expect(isEnable(validRequest, 'development')).toBeTruthy() //true true
             expect(isEnable(validRequest, 'dev')).toBeTruthy() //true true
         })
-        test('should not be enable', () => {
+        test('should not be false', () => {
             expect(isEnable(validRequest, 'production')).toBeFalsy() //true false
             expect(isEnable(invalidRequest, 'development')).toBeFalsy() //false true
             expect(isEnable(invalidRequest, 'production')).toBeFalsy() //false false

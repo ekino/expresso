@@ -71,7 +71,8 @@ To test it run build and use npm link `@ekino/expresso` in an express project.
     - React is currently the better solution to do things faster
   - [x] Handle gzip response
   - [x] Prevent middleware from running multiple times in case the underlying requests come from the same express app (Read and remove X-Expresso-Enable from header ?)
-  - [ ] Create I/O type with Typescript
+  - [x] Create I/O type with Typescript
+  - [x] Store original res header
   - [ ] Prevent requests overlapping by uniquely identifiying them (X-Unique-Id)
   - [ ] Handle error
   - [ ] Handle redirect (301 status) or any edge cases
