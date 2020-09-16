@@ -16,10 +16,13 @@ import {
     ExpressoHttpInterceptorResponse,
     ExpressoHttpInterceptorRequest
 } from '../interceptors/definitions'
+import { EXPRESSO_STATIC_PATH } from '../constants'
 
 export const handleRender = (
     originalCall: ExpressoCall,
-    underlyingCalls: ExpressoHttpInterceptorData[]
+    underlyingCalls: ExpressoHttpInterceptorData[],
+    staticPath?: string,
+    publicPath?: string
 ): any => {
     // Grab the initial state from our Redux store
     const preloadedState = getInitialState(underlyingCalls, originalCall)
@@ -38,16 +41,21 @@ export const handleRender = (
     const finalState = store.getState()
 
     // Send the rendered page back to the client
-    return renderFullPage(html, finalState)
+    return renderFullPage(html, finalState, staticPath, publicPath)
 }
 
-export const renderFullPage = (html: any, preloadedState: any): any => {
+export const renderFullPage = (
+    html: any,
+    preloadedState: any,
+    staticPath?: string,
+    publicPath?: string
+): any => {
     return `
     <!doctype html>
     <html>
       <head>
         <title>Expresso</title>
-        <link rel="shortcut icon" type="image/jpg" href="expresso/favicon.ico"/>
+        <link rel="shortcut icon" type="image/jpg" href="favicon.ico"/>
       </head>
       <body>
         <div id="root">${html}</div>
@@ -56,7 +64,8 @@ export const renderFullPage = (html: any, preloadedState: any): any => {
           // https://redux.js.org/recipes/server-rendering/#security-considerations
           window.__PRELOADED_STATE__ = ${JSON.stringify(preloadedState).replace(/</g, '\\u003c')}
         </script>
-        <script type="application/javascript" src="/expresso/client.js"></script>
+        <script type="application/javascript" src="${staticPath ||
+            EXPRESSO_STATIC_PATH}/client.js"></script>
       </body>
     </html>
     `
