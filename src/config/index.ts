@@ -1,12 +1,14 @@
 import { Options } from './definitions'
-import { EXPRESSO_STATIC_PATH } from '../constants'
+import { EXPRESSO_ENV, EXPRESSO_STATIC_PATH } from '../constants'
 
 export const defaultOptions: Options = {
-    env: ['development', 'dev']
+    env: EXPRESSO_ENV,
+    staticPath: EXPRESSO_STATIC_PATH
 }
 
-export const runInValidEnvironment = (env: string, options: any = defaultOptions): boolean => {
-    return options.env.includes(env)
+export const runInValidEnvironment = (env: string, options: Options = defaultOptions): boolean => {
+    const optionalEnv = options.env || defaultOptions.env || EXPRESSO_ENV
+    return optionalEnv.includes(env)
 }
 
 export const isEnable = (req: any, env: string, options: any = defaultOptions): boolean => {

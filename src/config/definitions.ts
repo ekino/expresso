@@ -1,3 +1,4 @@
 export type Options = {
-    env: Array<string>
+    env?: Array<string> | null
+    staticPath?: string | null
 }

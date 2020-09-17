@@ -2,7 +2,7 @@
     "name": "@ekino/expresso",
     "types": "build/index.d.ts",
     "main": "build/index.js",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "expresso aims at helping developer to debug their application",
     "repository": "git@github.com:ekino/expresso.git",
     "author": "Matthieu Leroy <matthieu.leroy@ekino.com>",
